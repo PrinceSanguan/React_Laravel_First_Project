@@ -1,13 +1,14 @@
-import { React, useRef } from "react";
+import React, { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import axiosClient from "../axios-client";
+import { useStateContext } from "../contexts/ContextProvider";
 
 export default function Signup() {
     const nameRef = useRef();
     const emailRef = useRef();
     const passwordRef = useRef();
     const passwordConfirmationRef = useRef();
-
+    const [errors, setErrors] = useState(null);
     const { setUser, setToken } = useStateContext();
 
     function onSubmit(ev) {
@@ -19,17 +20,18 @@ export default function Signup() {
             password_confirmation: passwordConfirmationRef.current.value,
         };
 
-        axiosClient.post("/signup", payload).then((data) => {
-            setUser(data.user);
-            setToken(data.token);
-        });
-
-        .catch(err => {
-            const response = err.response;
-            if (response && response.status == 422) {
-              console.log(response.data.errors);
-            }
-        })
+        axiosClient
+            .post("/signup", payload)
+            .then(({ data }) => {
+                setUser(data.user);
+                setToken(data.token);
+            })
+            .catch((err) => {
+                const response = err.response;
+                if (response && response.status === 422) {
+                    setErrors(response.data.errors);
+                }
+            });
     }
 
     return (
@@ -37,6 +39,13 @@ export default function Signup() {
             <div className="form">
                 <form onSubmit={onSubmit} action="">
                     <h1 className="title">Signup for free</h1>
+                    {errors && (
+                        <div className="alert">
+                            {Object.keys(errors).map((key) => (
+                                <p key={key}>{errors[key][0]}</p>
+                            ))}
+                        </div>
+                    )}
                     <input ref={nameRef} type="text" placeholder="Full name" />
                     <input
                         ref={emailRef}
@@ -63,5 +72,3 @@ export default function Signup() {
         </div>
     );
 }
-
-//1:17:00

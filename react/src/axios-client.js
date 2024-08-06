@@ -1,28 +1,39 @@
 import axios from "axios";
 
 const axiosClient = axios.create({
-    baseURL: `${import.meta.env.VITE_API_BASE_URL}` / api,
+    baseURL: `${import.meta.env.VITE_API_BASE_URL}/api`,
 });
 
-axiosClient.interceptors.request.use((config) => {
-    const token = localStorage.get("ACCESS_TOKEN");
+// Request Interceptor to add the Authorization header if a token is present
+axiosClient.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem("ACCESS_TOKEN");
 
-    config.headers.Authorization = `Bearer ${token}`;
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
 
-    return config;
-});
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
 
+// Response Interceptor to handle specific status codes
 axiosClient.interceptors.response.use(
     (response) => {
         return response;
     },
     (error) => {
         const { response } = error;
-        if (response.status == 401) {
+
+        if (response && response.status === 401) {
+            // Remove token if unauthorized
             localStorage.removeItem("ACCESS_TOKEN");
         }
 
-        throw error;
+        return Promise.reject(error); // Ensure the error is passed on
     }
 );
 

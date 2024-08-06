@@ -10,39 +10,38 @@ import Dashboard from "./views/Dashboard";
 const router = createBrowserRouter([
     {
         path: "/",
+        element: <GuestLayout />, // GuestLayout for guest routes
+        children: [
+            {
+                path: "login", // Nested route for login
+                element: <Login />,
+            },
+            {
+                path: "signup", // Nested route for signup
+                element: <Signup />,
+            },
+        ],
+    },
+    {
+        path: "/", // This should be the default layout for authenticated routes
         element: <DefaultLayout />,
         children: [
             {
-                path: "/",
+                path: "/users", // Redirect to /users
                 element: <Navigate to="/users" />,
             },
             {
-                path: "/dashboard",
+                path: "dashboard", // Route for dashboard
                 element: <Dashboard />,
             },
             {
-                path: "/users",
+                path: "users", // Route for users
                 element: <Users />,
             },
         ],
     },
     {
-        path: "/",
-        element: <GuestLayout />,
-        children: [
-            {
-                path: "/login",
-                element: <Login />,
-            },
-            {
-                path: "/signup",
-                element: <Signup />,
-            },
-        ],
-    },
-
-    {
-        path: "*",
+        path: "*", // Catch-all route for 404 Not Found
         element: <NotFound />,
     },
 ]);
